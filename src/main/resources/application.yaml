@@ -1,3 +1,11 @@
 spring:
   application:
     name: challenge
+
+petstore:
+  base-url: https://petstore.swagger.io/v2
+
+logging:
+  level:
+    com.mb3.challenge: DEBUG
+    feign: DEBUG
