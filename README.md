@@ -27,7 +27,7 @@ Microservicio Spring Boot que consume la [Petstore API](https://petstore.swagger
 
 ```bash
 # Clonar el repositorio
-git clone <url-del-repo>
+git clone https://github.com/urielmtzb/challenge.git
 cd challenge
 
 # Ejecutar con Gradle wrapper
@@ -175,4 +175,63 @@ Ejemplo de salida al crear una mascota:
 ```
 INFO  PetService - Creando mascota -> id: 10000023, nombre: Firulais, status: available
 INFO  PetService - Mascota creada exitosamente -> id: 10000023, nombre: Firulais, status: available, transactionId: 550e8400-..., dateCreated: 2026-09-15T14:31:00
+```
+
+---
+
+## 🧪 Pruebas unitarias
+
+### Cobertura de tests
+
+| Clase bajo prueba | Archivo de test | # Tests |
+|---|---|---|
+| `PetService` | `PetServiceTest` | 7 |
+| `PetController` | `PetControllerTest` | 4 |
+| `ChallengeApplication` | `ChallengeApplicationTests` | 1 |
+
+### Ejecutar todos los tests
+
+```bash
+# Linux / Mac
+./gradlew test
+
+# Windows
+.\gradlew.bat test
+```
+
+### Ejecutar una clase específica
+
+```bash
+.\gradlew.bat test --tests "com.mb3.challenge.service.PetServiceTest"
+.\gradlew.bat test --tests "com.mb3.challenge.controller.PetControllerTest"
+```
+
+### Ejecutar un test específico
+
+```bash
+.\gradlew.bat test --tests "com.mb3.challenge.service.PetServiceTest.create_shouldSetTransactionIdAsUuidV4"
+```
+
+### Ver reporte HTML
+
+Después de ejecutar los tests, el reporte está disponible en:
+
+```
+build/reports/tests/test/index.html
+```
+
+```bash
+# Abrir en Windows
+start build\reports\tests\test\index.html
+```
+
+### Estructura de los tests
+
+```
+src/test/java/com/mb3/challenge/
+├── ChallengeApplicationTests.java     # Context load test
+├── service/
+│   └── PetServiceTest.java            # @Mock PetClient — lógica de negocio
+└── controller/
+    └── PetControllerTest.java         # MockMvc standaloneSetup + @Mock PetServiceI
 ```
