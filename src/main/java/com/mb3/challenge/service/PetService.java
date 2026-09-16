@@ -4,6 +4,7 @@ import com.mb3.challenge.client.PetClient;
 import com.mb3.challenge.dto.PetRequest;
 import com.mb3.challenge.dto.PetResponse;
 import com.mb3.challenge.exception.ServiceException;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,29 +23,39 @@ class PetService implements PetServiceI {
     public PetResponse create(PetRequest petRequest) throws ServiceException {
         log.info("Creando mascota -> id: {}, nombre: {}, status: {}",
                 petRequest.getId(), petRequest.getName(), petRequest.getStatus());
+        try {
+            PetResponse pet = petClient.addPet(petRequest);
 
-        PetResponse pet = petClient.addPet(petRequest);
+            // Enriquecer con campos generados en la capa service
+            pet.setTransactionId(UUID.randomUUID().toString());
+            pet.setDateCreated(LocalDateTime.now());
 
-        // Enriquecer con campos generados en la capa service
-        pet.setTransactionId(UUID.randomUUID().toString());
-        pet.setDateCreated(LocalDateTime.now());
+            log.info("Mascota creada exitosamente -> id: {}, nombre: {}, status: {}, transactionId: {}, dateCreated: {}",
+                    pet.getId(), pet.getName(), pet.getStatus(),
+                    pet.getTransactionId(), pet.getDateCreated());
 
-        log.info("Mascota creada exitosamente -> id: {}, nombre: {}, status: {}, transactionId: {}, dateCreated: {}",
-                pet.getId(), pet.getName(), pet.getStatus(),
-                pet.getTransactionId(), pet.getDateCreated());
-
-        return pet;
+            return pet;
+        } catch (FeignException ex) {
+            log.error("Error al crear mascota en el API externo [status={}]: {}",
+                    ex.status(), ex.getMessage());
+            throw ex; // el GlobalExceptionHandler lo intercepta
+        }
     }
 
     @Override
     public PetResponse findOne(Long id) throws ServiceException {
         log.info("Buscando mascota con id: {}", id);
+        try {
+            PetResponse pet = petClient.getPetById(id);
 
-        PetResponse pet = petClient.getPetById(id);
+            log.info("Mascota encontrada -> id: {}, nombre: {}, status: {}",
+                    pet.getId(), pet.getName(), pet.getStatus());
 
-        log.info("Mascota encontrada -> id: {}, nombre: {}, status: {}",
-                pet.getId(), pet.getName(), pet.getStatus());
-
-        return pet;
+            return pet;
+        } catch (FeignException ex) {
+            log.error("Error al buscar mascota con id: {} en el API externo [status={}]: {}",
+                    id, ex.status(), ex.getMessage());
+            throw ex; // el GlobalExceptionHandler lo intercepta
+        }
     }
 }
